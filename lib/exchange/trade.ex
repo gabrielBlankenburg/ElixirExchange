@@ -7,9 +7,23 @@ defmodule Exchange.Trade do
   @type price :: %{date: %DateTime{}, value: float()}
   @type order :: %{value: float(), amount: integer()}
 
+  @max_prices_buffered 500
+
   @spec start_link(%{currency: atom(), prices: list(price())}) :: GenServer.on_start()
   def start_link(%{currency: name} = args) do
-    GenServer.start(__MODULE__, args, name: name)
+    GenServer.start_link(__MODULE__, args, name: name)
+  end
+
+  @spec start_link(atom(), float()) :: GenServer.on_start()
+  def start_link(name, price_value) do
+    price = %{value: price_value, date: DateTime.now!("Etc/UTC")}
+
+    args = %{
+      currency: name,
+      prices: [price]
+    }
+
+    GenServer.start_link(__MODULE__, args, name: name)
   end
 
   @doc """
@@ -96,17 +110,15 @@ defmodule Exchange.Trade do
   end
 
   def handle_cast({:keep_only_last_n_orders, :buy, amount}, {data, {buys, sells}}) do
-    case Enum.split(buys, amount) do
-      {new_buys, []} -> {:noreply, {data, {new_buys, sells}}}
-      {_, new_buys} -> {:noreply, {data, {new_buys, sells}}}
-    end
+    {new_buys, _} = Enum.split(buys, amount)
+
+    {:noreply, {data, {new_buys, sells}}}
   end
 
   def handle_cast({:keep_only_last_n_orders, :sell, amount}, {data, {buys, sells}}) do
-    case Enum.split(sells, amount) do
-      {new_sells, []} -> {:noreply, {data, {buys, new_sells}}}
-      {_, new_sells} -> {:noreply, {data, {buys, new_sells}}}
-    end
+    {new_sells, _} = Enum.split(sells, amount)
+
+    {:noreply, {data, {buys, new_sells}}}
   end
 
   @impl true
@@ -144,7 +156,7 @@ defmodule Exchange.Trade do
   # If there is a deal to be done, it refreshes the price (the sell value) and refreshes the orders
   # removing the amount sold from both orders, if any order had less than the demanded, they are removed
   # from the order list and the next order is compared. It is made recursively untill there is no valid
-  # deal. Returns the new state
+  # deal. It also keeps only the latest @max_prices_buffered in the state. Returns the new state
   defp handle_orders(
     %{prices: prices} = data,
     [%{value: buy_value} | _] = buys,
@@ -152,7 +164,9 @@ defmodule Exchange.Trade do
   ) when buy_value >= sell_value do
     price = %{date: DateTime.now!("Etc/UTC"), value: sell_value}
 
-    new_data = Map.put(data, :prices, [price | prices])
+    {new_prices, _} = Enum.split(prices, @max_prices_buffered - 1)
+
+    new_data = Map.put(data, :prices, [price | new_prices])
 
     orders = handle_after_deal(buys, sells)
 

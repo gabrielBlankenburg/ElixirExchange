@@ -1,0 +1,9 @@
+<div id="trade-index">
+  <h1>List of Currencies</h1>
+
+  <ul class="currency-list">
+    <%= for currency <- @currencies do %>
+      <li><%= link currency[:name], to: Routes.trade_path(@conn, :show, currency[:id]) %></li>
+    <% end %>
+  </ul>
+</div>

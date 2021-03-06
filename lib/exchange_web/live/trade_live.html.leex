@@ -1,0 +1,44 @@
+<div id="trade-currency">
+  <h1><%= @id %></h1>
+  <h3 class="price">Price: <%= @price %></h3>
+  <div class="orders">
+    <div id="buy-orders">
+      <span class="title">Buy Orders</span>
+      <table>
+        <thead>
+          <tr>
+            <th>Value</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for order <- @buy_orders do %>
+            <tr>
+              <td><%= order[:value] %></td>
+              <td><%= order[:amount] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <div id="sell-orders">
+      <span class="title">Sell Orders</span>
+      <table>
+        <thead>
+          <tr>
+            <th>Value</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for order <- @sell_orders do %>
+            <tr>
+              <td><%= order[:value] %></td>
+              <td><%= order[:amount] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

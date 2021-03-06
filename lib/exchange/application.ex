@@ -14,9 +14,18 @@ defmodule Exchange.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Exchange.PubSub},
       # Start the Endpoint (http/https)
-      ExchangeWeb.Endpoint
+      ExchangeWeb.Endpoint,
       # Start a worker by calling: Exchange.Worker.start_link(arg)
       # {Exchange.Worker, arg}
+      %{
+        id: Exchange.TradeSupervisor,
+        type: :supervisor,
+        start: {
+          Exchange.TradeSupervisor,
+          :start_link,
+          [:ok]
+        }
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

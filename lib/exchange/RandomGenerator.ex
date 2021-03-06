@@ -17,8 +17,8 @@ defmodule Exchange.RandomGenerator do
 	`max_variance` uses the same logic as the `min_variance`, but setting it to the maximum order value. Default is `0.05`
 	`min_order_amount` is the minimum amount of shares for an order. Default is `10`
 	`min_order_amount` is the maximum amount of shares for an order. Default is `100`
-	`min_volume` is the minimum amount of orders by frequency. Default is `100`
-	`max_volume` is the maximum amount of orders by frequency. Default is: `1000`
+	`min_volume` is the minimum amount of orders by frequency. Default is `10`
+	`max_volume` is the maximum amount of orders by frequency. Default is: `100`
 	`amount_keep_orders` the amount of orders kept when clears the orders. Default is `1000`.
 	`clear_orders_frequency` is the frequency in miliseconds to clear the orders. Default is `5000`.
 	"""
@@ -38,10 +38,10 @@ defmodule Exchange.RandomGenerator do
 	@default_price_variance 0.05
 	@default_min_order_amount 10
 	@default_max_order_amount 100
-	@default_min_volume 100
-	@default_max_volume 1000
-	@default_amount_keep_orders 1000
-	@default_clear_orders_frequency 5000
+	@default_min_volume 10
+	@default_max_volume 100
+	@default_amount_keep_orders 200
+	@default_clear_orders_frequency 3000
 
 	@doc """
 	Receives the id of the currency, which action will be made and the `options()`.
@@ -62,7 +62,7 @@ defmodule Exchange.RandomGenerator do
 			clear_orders_frequency: get_init_opts(opts, :clear_orders_frequency)
 		}
 
-		GenServer.start(__MODULE__, args)
+		GenServer.start_link(__MODULE__, args)
 	end
 
 	@doc """

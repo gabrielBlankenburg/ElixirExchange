@@ -18,6 +18,9 @@ defmodule ExchangeWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
+
+    get "trades", TradeController, :index
+    get "trades/:id", TradeController, :show
   end
 
   # Other scopes may use custom stacks.
